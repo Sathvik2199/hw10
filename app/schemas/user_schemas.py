@@ -19,26 +19,15 @@ def validate_url(url: Optional[str]) -> Optional[str]:
         raise ValueError('Invalid URL format')
     return url
 
-def validate_password(value):
-    """Validate password complexity requirements."""
-    # Ensure password meets complexity requirements
-    if not any(c.islower() for c in value):
-        raise ValueError("Password must contain at least one lowercase letter.")
-    if not any(c.isupper() for c in value):
-        raise ValueError("Password must contain at least one uppercase letter.")
-    if not any(c in "!@#$%^&*()_+-=[]{}|;':\",.<>?/`~" for c in value):
-        raise ValueError("Password must contain at least one special character.")
-    return value
-
 class UserBase(BaseModel):
-    email: EmailStr
-    nickname: Optional[str] = Field(None, min_length=3, pattern=r'^[\w-]+$')
-    first_name: Optional[str]
-    last_name: Optional[str]
-    bio: Optional[str]
-    profile_picture_url: Optional[str]
-    linkedin_profile_url: Optional[str]
-    github_profile_url: Optional[str]
+    email: EmailStr = Field(..., example="john.doe@example.com")
+    nickname: Optional[str] = Field(None, min_length=3, pattern=r'^[\w-]+$', example=generate_nickname())
+    first_name: Optional[str] = Field(None, example="John")
+    last_name: Optional[str] = Field(None, example="Doe")
+    bio: Optional[str] = Field(None, example="Experienced software developer specializing in web applications.")
+    profile_picture_url: Optional[str] = Field(None, example="https://example.com/profiles/john.jpg")
+    linkedin_profile_url: Optional[str] = Field(None, example="https://linkedin.com/in/johndoe")
+    github_profile_url: Optional[str] = Field(None, example="https://github.com/johndoe")
 
     _validate_urls = validator(
         'profile_picture_url',
@@ -55,8 +44,6 @@ class UserCreate(UserBase):
     password: str
 
 class UserUpdate(UserBase):
-    email: Optional[EmailStr]
-
     @root_validator(pre=True)
     def at_least_one_non_null(cls, values):
         if not any(v is not None for v in values.values()):
@@ -69,9 +56,9 @@ class UserResponse(UserBase):
     is_professional: Optional[bool] = Field(default=False)
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
-    
+    email: EmailStr = Field(..., example="test@example.com")
+    password: str = Field(..., example="MyPass123")
+
 class UserListResponse(BaseModel):
     items: List[UserResponse]
     total: int
